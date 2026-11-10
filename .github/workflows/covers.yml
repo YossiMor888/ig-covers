@@ -1,0 +1,54 @@
+name: build-covers
+
+# Daily: re-read the live site, regenerate the Instagram cover images (property photo with
+# a two-line info overlay) and commit only what changed. Runs ~30 min after the queue
+# refresh in the claude-skills repo (03:17 UTC) and long before the 11:00 Israel post.
+#
+# extract_queue.py is a copy of the one in claude-skills/social-media-marketing/autopost.
+# If the site's markup changes and that one is fixed, copy the fix here too - a stale copy
+# means missing covers, which makes the Instagram post fail loudly (Telegram alert), never
+# post an un-captioned first photo.
+
+on:
+  schedule:
+    - cron: "47 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-covers
+  cancel-in-progress: false
+
+jobs:
+  covers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install dependencies and fonts
+        run: |
+          pip install pillow python-bidi
+          sudo apt-get install -y fonts-dejavu-core
+      - name: Extract the live site
+        run: |
+          python extract_queue.py
+          python - <<'PY'
+          import json
+          d = json.load(open("properties.json", encoding="utf-8"))
+          print("eligible:", len(d["eligible"]))
+          if not d["eligible"]:
+              raise SystemExit("ELIGIBLE IS ZERO - refusing to continue")
+          PY
+      - name: Build covers
+        run: python make_covers.py .
+      - name: Commit changes
+        run: |
+          git config user.name "covers-bot"
+          git config user.email "covers-bot@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then echo "no changes"; else git commit -m "Update covers $(date -u +%F)" && git push; fi
