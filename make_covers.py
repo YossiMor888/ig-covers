@@ -17,8 +17,18 @@ and any system bold font that has the shekel sign (Segoe UI on Windows, DejaVu o
 Usage: python make_covers.py <outdir>
 """
 import hashlib, io, json, os, sys, time, urllib.request
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, features
 from bidi.algorithm import get_display
+
+# Pillow wheels on Linux ship with libraqm, which does the right-to-left layout itself;
+# on Windows it does not. Reordering by hand AND letting raqm reorder prints the Hebrew
+# backwards (found 2026-11-10 on the first GitHub run), so reorder only without raqm.
+RAQM = features.check("raqm")
+RENDER_VERSION = 2  # bump to force every cover to be rebuilt
+
+
+def shape(text):
+    return text if RAQM else get_display(text)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 HEEBO = os.path.join(HERE, "fonts", "Heebo-Bold.ttf")
@@ -62,7 +72,7 @@ def fetch_base(img_url):
 def fit(draw, text, size):
     while size > 30:
         f = ImageFont.truetype(HEEBO, size)
-        if draw.textlength(get_display(text), font=f) <= SAFE_W:
+        if draw.textlength(shape(text), font=f) <= SAFE_W:
             return f
         size -= 2
     return f
@@ -78,7 +88,7 @@ def render(base, l1, price):
     d = ImageDraw.Draw(img)
     if l1:
         f1 = fit(d, l1, 66)
-        t = get_display(l1)
+        t = shape(l1)
         d.text(((W - d.textlength(t, font=f1)) / 2, top + 50), t, font=f1, fill=(255, 255, 255, 255))
         y_price = top + 145
     else:
@@ -111,7 +121,7 @@ def main():
             continue
         try:
             cid = cover_id(r["url"])
-            entry = {"url": r["url"], "line1": line1(r), "price": r["price"], "src": r["images"][0]}
+            entry = {"url": r["url"], "line1": line1(r), "price": r["price"], "src": r["images"][0], "v": RENDER_VERSION}
             fpath = os.path.join(out, cid + ".jpg")
             # Unchanged inputs and the file is there: keep it, so the public repo does not
             # collect a binary diff every day.
