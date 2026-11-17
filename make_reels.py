@@ -84,7 +84,11 @@ def main():
                "video_url": None, "status": "no_video", "v": VERSION}
         if r.get("yt_id"):
             same = old.get("yt_id") == r["yt_id"] and old.get("v") == VERSION
-            if same and old.get("status") == "ok" and (i + ".mp4") in assets:
+            # The video file already on the release is what counts: YouTube blocks downloads
+            # from GitHub's servers ("confirm you're not a bot", seen on the first run
+            # 2026-11-17), so new videos are built on Yossi's machine and the daily GitHub
+            # run only has to see that the file is there.
+            if same and (i + ".mp4") in assets:
                 rec.update(video_url=VIDEO_URL.format(id=i), status="ok")
                 kept += 1
                 print("KEEP ", i, r["yt_id"], file=sys.stderr)
