@@ -23,8 +23,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = "YossiMor888/ig-covers"
 TAG = "reels"
 VIDEO_URL = "https://github.com/" + REPO + "/releases/download/" + TAG + "/{id}.mp4"
-VERSION = 1  # bump to force every reel to be rebuilt
-MAX_BYTES = 95 * 1024 * 1024
+VERSION = 2  # bump to force every reel to be rebuilt (2: bitrate capped for Instagram)
+MAX_BYTES = 900 * 1024 * 1024  # Instagram's limit is 1 GB; release assets allow 2 GB
 FILTER = (
     "[0:v]split=2[a][b];"
     "[a]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=24:2[bg];"
@@ -50,16 +50,17 @@ def build(yt_id, work, dest):
     run(["yt-dlp", "-q", "--no-playlist", "-f",
          "bv*[height<=1080][ext=mp4]+ba[ext=m4a]/b[height<=1080][ext=mp4]/bv*[height<=1080]+ba/b",
          "--merge-output-format", "mp4", "-o", src, "https://www.youtube.com/watch?v=" + yt_id])
-    for crf in (23, 27, 31):
-        run(["ffmpeg", "-y", "-loglevel", "error", "-i", src, "-filter_complex", FILTER,
-             "-map", "[v]", "-map", "0:a?", "-t", "900",
-             "-c:v", "libx264", "-preset", "medium", "-crf", str(crf), "-profile:v", "high",
-             "-c:a", "aac", "-b:a", "128k", "-ar", "44100", "-ac", "2",
-             "-movflags", "+faststart", dest])
-        if os.path.getsize(dest) <= MAX_BYTES:
-            break
-    else:
-        raise RuntimeError("video still over 95 MB at crf 31")
+    # Instagram Reel spec (Make CreateAReelPost): H.264 closed GOP, 4:2:0, 23-60 fps,
+    # video VBR 5 Mbps max, AAC 48 kHz max stereo 128k, moov atom first, 3 s - 15 min.
+    # The first encode at plain crf 23 came out at ~5.2 Mbps, so the rate is capped.
+    run(["ffmpeg", "-y", "-loglevel", "error", "-i", src, "-filter_complex", FILTER,
+         "-map", "[v]", "-map", "0:a?", "-t", "900",
+         "-c:v", "libx264", "-preset", "medium", "-crf", "23",
+         "-maxrate", "4500k", "-bufsize", "9000k", "-profile:v", "high", "-g", "60",
+         "-c:a", "aac", "-b:a", "128k", "-ar", "44100", "-ac", "2",
+         "-movflags", "+faststart", dest])
+    if os.path.getsize(dest) > MAX_BYTES:
+        raise RuntimeError("video over the size limit")
     os.remove(src)
 
 
