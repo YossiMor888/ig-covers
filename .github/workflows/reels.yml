@@ -1,0 +1,72 @@
+name: build-reels
+
+# Daily: re-read the live site, turn each property's YouTube video into a vertical 1080x1920
+# Reel and publish it as an asset of the "reels" release (never committed - videos in git
+# history would bloat this public repo). The caption + video URL per property is committed as
+# reels/<md5(url)>.json, which the Make Instagram scenario reads. Rule (Yossi, 2026-11-17):
+# Instagram posts the video as a Reel, never photos, and the caption carries no price.
+#
+# extract_queue.py and make_reels.py are copies of the ones in
+# claude-skills/social-media-marketing/autopost. Fix there, copy here.
+
+on:
+  schedule:
+    - cron: "17 4 * * *"
+  workflow_dispatch:
+    inputs:
+      only:
+        description: "Build just this yt_id or md5 id (test run)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-reels
+  cancel-in-progress: false
+
+jobs:
+  reels:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install yt-dlp and ffmpeg
+        run: |
+          pip install -U yt-dlp
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+          yt-dlp --version && ffmpeg -version | head -1
+      - name: Extract the live site
+        run: |
+          python extract_queue.py
+          python - <<'PY'
+          import json
+          d = json.load(open("properties.json", encoding="utf-8"))
+          print("eligible:", len(d["eligible"]), " with video:", sum(1 for x in d["eligible"] if x.get("yt_id")))
+          if not d["eligible"]:
+              raise SystemExit("ELIGIBLE IS ZERO - refusing to continue")
+          PY
+      - name: Make sure the release exists and list its assets
+        run: |
+          gh release view reels >/dev/null 2>&1 || gh release create reels --title "Instagram Reels" --notes "Vertical property videos for the Instagram autopost. Built by build-reels."
+          gh release view reels --json assets -q '.assets[].name' > assets.txt
+          wc -l assets.txt
+      - name: Build reels
+        run: |
+          if [ -n "${{ inputs.only }}" ]; then python make_reels.py out assets.txt --only "${{ inputs.only }}"; else python make_reels.py out assets.txt; fi
+      - name: Upload new videos
+        run: |
+          ls -la out || true
+          if ls out/*.mp4 >/dev/null 2>&1; then gh release upload reels out/*.mp4 --clobber; fi
+      - name: Commit records
+        run: |
+          git config user.name "covers-bot"
+          git config user.email "covers-bot@users.noreply.github.com"
+          git add reels/*.json
+          if git diff --cached --quiet; then echo "no changes"; else git commit -m "Update reels $(date -u +%F)" && git pull --rebase && git push; fi

@@ -152,6 +152,16 @@ def parse_property(url, raw):
     }
     d["price_in_body"] = bool(pd and pd in body_prices)
     d["price_conflict"] = bool(pd and body_prices and pd not in body_prices)
+
+    # --- property video (added 2026-11-17, Instagram Reels) ---
+    # Yossi's rule: Instagram publishes the property's own YouTube video as a Reel, never
+    # photos. The listing's video is the embedded player (youtube.com/embed/ID); the bare
+    # youtu.be link in the page text is the fallback. Footer links to the YouTube *channel*
+    # are not videos and never match these patterns.
+    m = re.search(r'youtube(?:-nocookie)?\.com/embed/([A-Za-z0-9_-]{11})', flat)
+    if not m:
+        m = re.search(r'(?:youtu\.be/|youtube\.com/watch\?v=|youtube\.com/shorts/)([A-Za-z0-9_-]{11})', flat)
+    d["yt_id"] = m.group(1) if m else None
     return d
 
 
@@ -176,8 +186,38 @@ def build_post(d):
     return "\n".join(lines).strip()
 
 
+def _tag(word):
+    return "#" + re.sub(r"[^\w]", "", word.replace(" ", "")) if word else None
+
+
+def build_reel_caption(d):
+    """Instagram Reel caption (added 2026-11-17).
+
+    The site's own copy verbatim plus the agent contact block, then 5 hashtags.
+    Yossi's rule: NO price line is added (the FB post_text keeps its own logic).
+    No URL either - links are not clickable in an Instagram caption.
+    """
+    lines = [d["description"]]
+    if not d.get("contact_in_body"):
+        lines += ["", "לפרטים ותיאום ביקור:"]
+        if d.get("agent_name"):
+            lines.append(d["agent_name"])
+        if d.get("agent_phone"):
+            lines.append(f"📞 {d['agent_phone']}")
+    ptype = (d.get("ptype") or "נכס").strip()
+    tags = ["#נדלן", _tag(ptype + "למכירה"), _tag(d.get("city")), "#נכסיםלמכירה", "#יוסימורנדלן"]
+    tags = [t for t in dict.fromkeys(tags) if t and len(t) > 1][:5]
+    tail = "\n\n" + " ".join(tags)
+    text = "\n".join(lines).strip()
+    # Instagram caps captions at 2200 characters; cut at a paragraph, never mid-word.
+    room = 2200 - len(tail)
+    while len(text) > room and "\n\n" in text:
+        text = text.rsplit("\n\n", 1)[0]
+    return (text[:room] + tail).strip()
+
+
 def main():
-    limit = int(sys.argv[1]) if len(sys.argv) > 1 else 0
+    limit =int(sys.argv[1]) if len(sys.argv) > 1 else 0
     sm = fetch(SITEMAP)
     urls = re.findall(r"<loc>([^<]*)</loc>", sm)
     # Old form ?property=slug, new form /property/slug/. The bare /property/ archive
@@ -212,6 +252,7 @@ def main():
             skipped.append({"url": u, "reason": reason, "title": d.get("title")})
         else:
             d["post_text"] = build_post(d)
+            d["reel_caption"] = build_reel_caption(d)
             records.append(d)
         print(f"[{i}/{len(urls)}] {'SKIP:'+reason if reason else 'OK'}  {d.get('title','')[:50]}",
               file=sys.stderr)
