@@ -47,8 +47,9 @@ def build(yt_id, work, dest):
     src = os.path.join(work, yt_id + ".src.mp4")
     if os.path.exists(src):
         os.remove(src)
-    run(["yt-dlp", "-q", "--no-playlist", "-f",
-         "bv*[height<=1080][ext=mp4]+ba[ext=m4a]/b[height<=1080][ext=mp4]/bv*[height<=1080]+ba/b",
+    # "res" sorts by the SMALLER side, so a vertical source (1080x2336) still comes in at
+    # full width; a plain height<=1080 filter picked a ~500 px wide stream for it.
+    run(["yt-dlp", "-q", "--no-playlist", "-f", "bv*+ba/b", "-S", "res:1080,ext:mp4:m4a",
          "--merge-output-format", "mp4", "-o", src, "https://www.youtube.com/watch?v=" + yt_id])
     # Instagram Reel spec (Make CreateAReelPost): H.264 closed GOP, 4:2:0, 23-60 fps,
     # video VBR 5 Mbps max, AAC 48 kHz max stereo 128k, moov atom first, 3 s - 15 min.
