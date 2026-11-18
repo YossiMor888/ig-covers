@@ -37,7 +37,7 @@ TAG = "reels"
 BASE = "https://github.com/" + REPO + "/releases/download/" + TAG + "/"
 VIDEO_URL = BASE + "{id}.mp4"
 CLEAN_URL = BASE + "{id}.clean.mp4"
-VERSION = 3  # 2: bitrate capped for Instagram. 3: two opening lines burned in (2026-11-18)
+VERSION = 4  # 2: bitrate capped. 3: two opening lines (2026-11-18). 4: lines moved up, solid band
 OVERLAY_SECONDS = 5.5  # must cover the cover frame the scenario asks for (thumb_offset 5000)
 MAX_BYTES = 900 * 1024 * 1024  # Instagram's limit is 1 GB; release assets allow 2 GB
 FILTER = (
@@ -168,13 +168,16 @@ def _fit(draw, text, size, width, extra=0):
 
 
 def render_overlay(lines, path):
-    """Transparent 1080x1920 PNG: a dark band across the middle with the two lines. The
-    middle is what the profile grid (3:4 crop) and the Reels UI both leave visible."""
+    """Transparent 1080x1920 PNG: a dark band with the two lines, in the blurred strip ABOVE
+    the video. A 16:9 source sits at y 656-1264, and most of Yossi's videos open with their own
+    title inside that frame. v3 put the band in the middle, right on top of those titles, and
+    they showed through it (seen on the first full build, 2026-11-18). y 310-630 is clear of
+    the video, inside the profile grid's 3:4 crop (y 240-1680), and below the Reels top bar."""
     W, H, band = 1080, 1920, 320
     img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
-    top = (H - band) // 2
-    d.rectangle([0, top, W, top + band], fill=(10, 20, 35, 175))
+    top = 310
+    d.rectangle([0, top, W, top + band], fill=(10, 20, 35, 215))
     l1, l2 = lines
     f1 = _fit(d, l1, 72, 900)
     t1 = _shape(l1)
