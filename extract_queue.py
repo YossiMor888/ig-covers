@@ -209,24 +209,40 @@ def strip_contact_lines(text):
     return re.sub(r"\n{3,}", "\n\n", "\n".join(kept)).strip()
 
 
-def _states_price(text, price):
-    """True when the text already carries the asking price (written 2,350,000 or 2350000)."""
-    pd = re.sub(r"[^0-9]", "", price or "")
-    nums = {re.sub(r"[^0-9]", "", m) for m in re.findall(r"[\d,]{5,}", text)}
-    return bool(pd) and pd in nums
+# --- No price in any post (Yossi's rule, 2026-11-18) ---
+# "I prefer that people contact us for the price": no post shows the asking price, on
+# Facebook or Instagram. The builders add no price line, and site-copy lines that carry an
+# asking-price figure are dropped from the post body (12 of 40 listings had one, e.g.
+# "💰 מחיר מבוקש: 2,590,000 ₪"). An asking price here is a round 6-8 digit figure (ends in
+# 000) or "N מיליון". Wording without a figure ("מחיר אטרקטיבי") and monthly rent figures
+# ("4,200 ₪ לחודש") stay: they do not disclose the price. Road numbers like "6,444,471" are
+# not round and stay too. The site itself is never touched.
+PRICE_FIG_RE = r"(?<![\d,.])\d{1,3}(?:[,.]\d{3}){1,2}(?![\d,.])|(?<!\d)\d{6,8}(?!\d)|\d+(?:[.,]\d+)?\s*מיליון"
+
+
+def _is_price_figure(m):
+    t = m.group(0)
+    if "מיליון" in t:
+        return True
+    n = re.sub(r"[^0-9]", "", t)
+    return 6 <= len(n) <= 8 and n.endswith("000") and not n.startswith("05")
+
+
+def strip_price_lines(text):
+    kept = [l for l in text.split("\n")
+            if not any(_is_price_figure(m) for m in re.finditer(PRICE_FIG_RE, l))]
+    return re.sub(r"\n{3,}", "\n\n", "\n".join(kept)).strip()
+
+
+def post_body(d):
+    """The site copy as it goes into a post: no contact lines, no asking price."""
+    return strip_price_lines(strip_contact_lines(d["description"]))
 
 
 def build_post(d):
-    """Facebook caption. Every fact here came from structured extraction."""
-    body = strip_contact_lines(d["description"])
-    parts = [body]
-    # Only add the price line if the post body doesn't already state it,
-    # otherwise the post shows the price twice.
-    if d.get("price") and not _states_price(body, d["price"]):
-        parts.append(f"💰 מחיר מבוקש: {d['price']} ₪")
-    parts.append(urllib.parse.unquote(d["url"]))
-    parts.append(CLOSING)
-    return "\n\n".join(parts)
+    """Facebook caption: site copy (no contact lines, no price), the property link, then the
+    closing block. Every fact here came from structured extraction."""
+    return "\n\n".join([post_body(d), urllib.parse.unquote(d["url"]), CLOSING])
 
 
 def _tag(word):
@@ -236,16 +252,16 @@ def _tag(word):
 def build_reel_caption(d):
     """Instagram Reel caption (added 2026-11-17, ending changed 2026-11-18).
 
-    The site's own copy (minus its contact lines), then 5 hashtags, then the closing block:
-    Yossi wants that block at the very end of every post, so the hashtags sit above it.
-    Yossi's rule: NO price line is added (the FB post_text keeps its own logic).
-    No property URL - links are not clickable in an Instagram caption.
+    The site's own copy (minus its contact lines and asking price), then 5 hashtags, then the
+    closing block: Yossi wants that block at the very end of every post, so the hashtags sit
+    above it. No price anywhere (his rule). No property URL - links are not clickable in an
+    Instagram caption.
     """
     ptype = (d.get("ptype") or "נכס").strip()
     tags = ["#נדלן", _tag(ptype + "למכירה"), _tag(d.get("city")), "#נכסיםלמכירה", "#יוסימורנדלן"]
     tags = [t for t in dict.fromkeys(tags) if t and len(t) > 1][:5]
     tail = "\n\n" + " ".join(tags) + "\n\n" + CLOSING
-    text = strip_contact_lines(d["description"])
+    text = post_body(d)
     # Instagram caps captions at 2200 characters; cut at a paragraph, never mid-word.
     room = 2200 - len(tail)
     while len(text) > room and "\n\n" in text:
