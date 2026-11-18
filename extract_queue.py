@@ -165,57 +165,68 @@ def parse_property(url, raw):
     return d
 
 
-# --- Yossi's details next to Yaakov's (added 2026-11-17) ---
-# Yossi's rule: every published post that shows Yaakov Greenberg's details also shows
-# Yossi's name and phone, placed BEFORE Yaakov's phone. Yossi's phone is the one the site's
-# own agent markup gives for him (structured field, 6+ listings), not typed from memory.
+# --- Post ending (Yossi's rule, 2026-11-18) ---
+# Every post, Facebook and Instagram, ends with exactly this block, in his wording. It
+# replaces the agent contact block that used to be appended, and keeps his 2026-11-17 rule
+# (Yossi's name and phone before Yaakov's). Both agents of all 40 listings on 2026-11-18 are
+# Yossi or Yaakov. The leading U+200F is an invisible right-to-left mark: the block's first
+# line starts with Latin text, and without it Facebook can lay the whole paragraph out
+# left-to-right, which scrambles the Hebrew lines under it.
 YOSSI_NAME, YOSSI_PHONE = "יוסי מור", "0545661202"
-YAAKOV_PHONE_RE = r"050[\-\s]?567[\-\s]?9639"
-YOSSI_PHONE_RE = r"054[\-\s]?566[\-\s]?1202"
+YAAKOV_NAME, YAAKOV_PHONE = "יעקב גרינברג", "0505679639"
+CLOSING = "‏" + "\n".join([
+    "🌐 yossimor.com",
+    "📞 לפרטים ותיאום ביקור –",
+    "התקשרו עכשיו",
+    f"{YOSSI_NAME} {YOSSI_PHONE}",
+    f"{YAAKOV_NAME} {YAAKOV_PHONE}",
+])
+# 13 of 40 listings (2026-11-18) carry their own contact lines in the site copy, in a dozen
+# shapes. With the closing block always there they would show the details twice, so the
+# post body drops: any line holding a phone number, any line starting with 📞, and short
+# signature lines (agent title, exclusive-marketing line, office slogan). The site address
+# is cut out of a line rather than dropping the line: the copy glues it to other text, e.g.
+# "🌐 yossimor.com📍 מיקום הנכס: ..." on one line. Every other line stays verbatim.
+# The site itself is never touched.
+SIGNATURE_RE = r"שיווק בלעדי|מגשימים חלומות|מומחה נדל"
+SITE_TOKEN_RE = r"🌐?\s*(?:https?://)?(?:www\.)?yossimor\.com/?(?=\s|$|[^\w./-])"
 
 
-def contact_lines(d):
-    """Our own appended contact block: Yossi first whenever the agent is Yaakov."""
-    lines = []
-    if d.get("agent_phone") and re.search(YAAKOV_PHONE_RE, d["agent_phone"]):
-        lines += [YOSSI_NAME, f"📞 {YOSSI_PHONE}"]
-    if d.get("agent_name"):
-        lines.append(d["agent_name"])
-    if d.get("agent_phone"):
-        lines.append(f"📞 {d['agent_phone']}")
-    return lines
+def strip_contact_lines(text):
+    kept = []
+    for line in text.split("\n"):
+        s = line.strip()
+        cut = re.sub(SITE_TOKEN_RE, "", s).strip()
+        if cut != s:
+            if not re.search(r"[֐-׿A-Za-z0-9]", cut):
+                continue
+            line = s = cut
+        if re.search(PHONE_RE, s) or s.startswith("📞"):
+            continue
+        if len(s) <= 90 and re.search(SIGNATURE_RE, s):
+            continue
+        kept.append(line)
+    return re.sub(r"\n{3,}", "\n\n", "\n".join(kept)).strip()
 
 
-def add_yossi_before_yaakov(text):
-    """The site copy sometimes carries Yaakov's phone itself. The copy stays verbatim; one
-    line with Yossi's name and phone is inserted before the first line holding Yaakov's
-    phone, unless Yossi's phone is already in the text."""
-    if not re.search(YAAKOV_PHONE_RE, text) or re.search(YOSSI_PHONE_RE, text):
-        return text
-    lines = text.split("\n")
-    for i, l in enumerate(lines):
-        if re.search(YAAKOV_PHONE_RE, l):
-            lines.insert(i, f"{YOSSI_NAME} 📞 {YOSSI_PHONE}")
-            break
-    return "\n".join(lines)
+def _states_price(text, price):
+    """True when the text already carries the asking price (written 2,350,000 or 2350000)."""
+    pd = re.sub(r"[^0-9]", "", price or "")
+    nums = {re.sub(r"[^0-9]", "", m) for m in re.findall(r"[\d,]{5,}", text)}
+    return bool(pd) and pd in nums
 
 
 def build_post(d):
-    """Assemble the caption. Every fact here came from structured extraction."""
-    body = d["description"]
-    lines = [body, ""]
-    # Only add the price line if the site's own copy doesn't already state it,
+    """Facebook caption. Every fact here came from structured extraction."""
+    body = strip_contact_lines(d["description"])
+    parts = [body]
+    # Only add the price line if the post body doesn't already state it,
     # otherwise the post shows the price twice.
-    if d.get("price") and not d.get("price_in_body"):
-        lines.append(f"💰 מחיר מבוקש: {d['price']} ₪")
-    # Several listings end with their own contact block; don't append a second.
-    if not d.get("contact_in_body"):
-        lines.append("")
-        lines.append("לפרטים ותיאום ביקור:")
-        lines += contact_lines(d)
-    lines.append("")
-    lines.append(urllib.parse.unquote(d["url"]))
-    return add_yossi_before_yaakov("\n".join(lines).strip())
+    if d.get("price") and not _states_price(body, d["price"]):
+        parts.append(f"💰 מחיר מבוקש: {d['price']} ₪")
+    parts.append(urllib.parse.unquote(d["url"]))
+    parts.append(CLOSING)
+    return "\n\n".join(parts)
 
 
 def _tag(word):
@@ -223,25 +234,23 @@ def _tag(word):
 
 
 def build_reel_caption(d):
-    """Instagram Reel caption (added 2026-11-17).
+    """Instagram Reel caption (added 2026-11-17, ending changed 2026-11-18).
 
-    The site's own copy verbatim plus the agent contact block, then 5 hashtags.
+    The site's own copy (minus its contact lines), then 5 hashtags, then the closing block:
+    Yossi wants that block at the very end of every post, so the hashtags sit above it.
     Yossi's rule: NO price line is added (the FB post_text keeps its own logic).
-    No URL either - links are not clickable in an Instagram caption.
+    No property URL - links are not clickable in an Instagram caption.
     """
-    lines = [d["description"]]
-    if not d.get("contact_in_body"):
-        lines += ["", "לפרטים ותיאום ביקור:"] + contact_lines(d)
     ptype = (d.get("ptype") or "נכס").strip()
     tags = ["#נדלן", _tag(ptype + "למכירה"), _tag(d.get("city")), "#נכסיםלמכירה", "#יוסימורנדלן"]
     tags = [t for t in dict.fromkeys(tags) if t and len(t) > 1][:5]
-    tail = "\n\n" + " ".join(tags)
-    text = add_yossi_before_yaakov("\n".join(lines).strip())
+    tail = "\n\n" + " ".join(tags) + "\n\n" + CLOSING
+    text = strip_contact_lines(d["description"])
     # Instagram caps captions at 2200 characters; cut at a paragraph, never mid-word.
     room = 2200 - len(tail)
     while len(text) > room and "\n\n" in text:
         text = text.rsplit("\n\n", 1)[0]
-    return (text[:room] + tail).strip()
+    return text[:room].strip() + tail
 
 
 def main():
