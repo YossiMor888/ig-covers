@@ -37,10 +37,12 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-      - name: Install yt-dlp and ffmpeg
+      - name: Install yt-dlp, ffmpeg and the overlay tools
+        # pillow + python-bidi + DejaVu (has the ▶ sign) draw the two opening lines that
+        # make_reels.py burns into each Reel since 2026-11-18. Heebo comes from fonts/.
         run: |
-          pip install -U yt-dlp
-          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+          pip install -U yt-dlp pillow python-bidi
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg fonts-dejavu-core
           yt-dlp --version && ffmpeg -version | head -1
       - name: Extract the live site
         run: |
