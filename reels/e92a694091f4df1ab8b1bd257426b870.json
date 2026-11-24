@@ -9,5 +9,5 @@
   "בית פרטי 11 חדרים",
   "בודד עם נוף פתוח מלא למישור החוף ולשומרון"
  ],
- "error": "ther runtime add  --js-runtimes RUNTIME[:PATH]  to your command/config. YouTube extraction without a JS runtime has been deprecated, and some formats may be missing. See  https://github.com/yt-dlp/yt-dlp/wiki/EJS  for details on installing one\nERROR: [youtube] aOp0fDJ118M: This video is unavailable\n"
+ "error": "ror 403: Forbidden (caused by <HTTPError 403: Forbidden>)\nERROR: [youtube] aOp0fDJ118M: Failed to extract any player response; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U\n"
 }
