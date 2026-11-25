@@ -9,5 +9,5 @@
   "דירת 4 חדרים",
   "ענקית"
  ],
- "error": "ror 403: Forbidden (caused by <HTTPError 403: Forbidden>)\nERROR: [youtube] 2TnoZsQ8ujc: Failed to extract any player response; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U\n"
+ "error": "from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies\n"
 }
