@@ -79,6 +79,36 @@ def rid(url):
     return hashlib.md5(url.encode("utf-8")).hexdigest()
 
 
+# Branded cover (cover-builder Phase 4, plan approved by Yossi 2026-11-26). cover-builder's
+# stage_cover.py puts an approved cover in covers/ and records it in covers/index.json. A queue
+# item gets `cover_url` only when that file is here with the recorded sha256; otherwise the item
+# has no cover_url and the Make scenario keeps its thumb_offset frame, as before.
+def approved_covers(root=None):
+    path = os.path.join(root or HERE, "covers", "index.json")
+    if not os.path.exists(path):
+        return {}
+    try:
+        with open(path, encoding="utf-8") as fh:
+            items = json.load(fh).get("items", {})
+    except (OSError, ValueError):
+        return {}
+    out = {}
+    for pid, e in items.items():
+        f = os.path.join(root or HERE, "covers", os.path.basename(e.get("file", "")))
+        if e.get("file") and os.path.isfile(f):
+            with open(f, "rb") as fh:
+                if hashlib.sha256(fh.read()).hexdigest() == e.get("sha256"):
+                    out[pid] = e["cover_url"]
+    return out
+
+
+def queue_item(i, r, video_url, caption, covers):
+    item = {"id": i, "url": r["url"], "title": r["title"][:60], "video_url": video_url, "caption": caption}
+    if i in covers:
+        item["cover_url"] = covers[i]
+    return item
+
+
 def run(cmd):
     p = subprocess.run(cmd, capture_output=True, text=True)
     if p.returncode != 0:
@@ -243,14 +273,14 @@ def main():
     props = json.load(open(os.path.join(HERE, "properties.json"), encoding="utf-8"))
     built, kept, novideo, failed = 0, 0, 0, 0
     queue = []
+    covers = approved_covers()
     for r in props["eligible"]:
         i = rid(r["url"])
         path = os.path.join(recdir, i + ".json")
         old = json.load(open(path, encoding="utf-8")) if os.path.exists(path) else {}
         if only and only not in (i, r.get("yt_id")):
             if old.get("status") == "ok":
-                queue.append({"id": i, "url": r["url"], "title": r["title"][:60],
-                              "video_url": old["video_url"], "caption": r["reel_caption"]})
+                queue.append(queue_item(i, r, old["video_url"], r["reel_caption"], covers))
             continue
         cover = cover_lines(r)
         rec = {"url": r["url"], "yt_id": r.get("yt_id"), "caption": r["reel_caption"],
@@ -298,8 +328,7 @@ def main():
         with open(path, "w", encoding="utf-8") as f:
             json.dump(rec, f, ensure_ascii=False, indent=1)
         if rec["status"] == "ok":
-            queue.append({"id": i, "url": r["url"], "title": r["title"][:60],
-                          "video_url": rec["video_url"], "caption": rec["caption"]})
+            queue.append(queue_item(i, r, rec["video_url"], rec["caption"], covers))
     # The Make scenario rotates through this list only, so a property without a ready video
     # is skipped instead of costing the day its Reel (Yossi approved 2026-11-18).
     with open(os.path.join(recdir, "queue.json"), "w", encoding="utf-8") as f:
