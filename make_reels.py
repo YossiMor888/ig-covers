@@ -104,6 +104,8 @@ def approved_covers(root=None):
 
 def queue_item(i, r, video_url, caption, covers):
     item = {"id": i, "url": r["url"], "title": r["title"][:60], "video_url": video_url, "caption": caption}
+    if r.get("post_text"):  # Facebook posts the video with today's FB text (Yossi, 2026-11-26)
+        item["fb_text"] = r["post_text"]
     if i in covers:
         item["cover_url"] = covers[i]
     return item
