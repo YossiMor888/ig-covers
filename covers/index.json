@@ -21,6 +21,50 @@
     "bytes": 377703,
     "icc": "sRGB built-in"
    }
+  },
+  "9ad22dde807442f480e2bcce59d9a716": {
+   "file": "9ad22dde807442f480e2bcce59d9a716.11e3b6d6.jpg",
+   "sha256": "11e3b6d63867653f016031d81afeecf0ff51cb894a89befd8592e95f62f0ab96",
+   "cover_url": "https://raw.githubusercontent.com/YossiMor888/ig-covers/main/covers/9ad22dde807442f480e2bcce59d9a716.11e3b6d6.jpg",
+   "processing_id": "1da97d4a7edf16051376cd65",
+   "design": "v3",
+   "listing_url": "https://yossimor.com/property/%d7%9c%d7%9e%d7%9b%d7%99%d7%a8%d7%94-%d7%91%d7%90%d7%95%d7%a8%d7%a0%d7%99%d7%aa-%d7%90%d7%97%d7%93-%d7%94%d7%91%d7%aa%d7%99%d7%9d-%d7%94%d7%99%d7%a4%d7%99%d7%9d-%d7%95%d7%94%d7%9e%d7%95%d7%a9%d7%a7/",
+   "hook": "4.5 חדרים עם נוף עד הים",
+   "hook_approved_at": "2026-11-27T10:43:01",
+   "cover_approved_by": "Yossi",
+   "staged_at": "2026-11-27T10:44:40",
+   "jpeg": {
+    "format": "JPEG",
+    "size": [
+     1080,
+     1920
+    ],
+    "mode": "RGB",
+    "bytes": 205701,
+    "icc": "sRGB built-in"
+   }
+  },
+  "9a08b1ef13737ff0764581275ed5ab6e": {
+   "file": "9a08b1ef13737ff0764581275ed5ab6e.167c0bfb.jpg",
+   "sha256": "167c0bfb012db3c6a6c1e32ddf4ead7176df5e630ecd1135bf3c440915ee78dc",
+   "cover_url": "https://raw.githubusercontent.com/YossiMor888/ig-covers/main/covers/9a08b1ef13737ff0764581275ed5ab6e.167c0bfb.jpg",
+   "processing_id": "a8231169b1cf418dd4951cd3",
+   "design": "v3",
+   "listing_url": "https://yossimor.com/property/%d7%93%d7%99%d7%a8%d7%aa-4-%d7%97%d7%93%d7%a8%d7%99%d7%9d-%d7%9e%d7%95%d7%a9%d7%a7%d7%a2%d7%aa-%d7%a2%d7%95%d7%a8%d7%a4%d7%99%d7%aa/",
+   "hook": "דירת 4 חדרים מושקעת עורפית",
+   "hook_approved_at": "2026-11-27T10:43:02",
+   "cover_approved_by": "Yossi",
+   "staged_at": "2026-11-27T10:44:41",
+   "jpeg": {
+    "format": "JPEG",
+    "size": [
+     1080,
+     1920
+    ],
+    "mode": "RGB",
+    "bytes": 244671,
+    "icc": "sRGB built-in"
+   }
   }
  }
 }
