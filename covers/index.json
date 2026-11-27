@@ -65,6 +65,94 @@
     "bytes": 244671,
     "icc": "sRGB built-in"
    }
+  },
+  "9a9bfe10f70ad256a147c8fd1807940c": {
+   "file": "9a9bfe10f70ad256a147c8fd1807940c.48b1cb52.jpg",
+   "sha256": "48b1cb5228374fdd03a90e23ee1279b34eb3920b6bddf2ed10390141b1621ba5",
+   "cover_url": "https://raw.githubusercontent.com/YossiMor888/ig-covers/main/covers/9a9bfe10f70ad256a147c8fd1807940c.48b1cb52.jpg",
+   "processing_id": "f263f7d26903b7aba4c318a3",
+   "design": "v3",
+   "listing_url": "https://yossimor.com/property/%d7%93%d7%95-%d7%9e%d7%a9%d7%a4%d7%97%d7%aa%d7%99-%d7%9e%d7%99%d7%a7%d7%95%d7%9d-%d7%9e%d7%a8%d7%9b%d7%96%d7%99/",
+   "hook": "עליית גג ענקית של כ-50 מ\"ר",
+   "hook_approved_at": "2026-11-27T11:19:02",
+   "cover_approved_by": "Yossi",
+   "staged_at": "2026-11-27T11:21:03",
+   "jpeg": {
+    "format": "JPEG",
+    "size": [
+     1080,
+     1920
+    ],
+    "mode": "RGB",
+    "bytes": 308319,
+    "icc": "sRGB built-in"
+   }
+  },
+  "a5ae0d9745efe7a57500adcee10ba53e": {
+   "file": "a5ae0d9745efe7a57500adcee10ba53e.b63e0d4d.jpg",
+   "sha256": "b63e0d4d89bb3ed4de4a97d372a42d4bb41288081c56d65bfce50dabe4a472e7",
+   "cover_url": "https://raw.githubusercontent.com/YossiMor888/ig-covers/main/covers/a5ae0d9745efe7a57500adcee10ba53e.b63e0d4d.jpg",
+   "processing_id": "26c6620fb895e8f2ac77a604",
+   "design": "v3",
+   "listing_url": "https://yossimor.com/property/%d7%91%d7%99%d7%aa-%d7%9b%d7%a4%d7%a8%d7%99-%d7%9e%d7%99%d7%95%d7%97%d7%93-%d7%9e%d7%90%d7%95%d7%93/",
+   "hook": "בית כפרי מיוחד מאוד",
+   "hook_approved_at": "2026-11-27T11:19:10",
+   "cover_approved_by": "Yossi",
+   "staged_at": "2026-11-27T11:21:04",
+   "jpeg": {
+    "format": "JPEG",
+    "size": [
+     1080,
+     1920
+    ],
+    "mode": "RGB",
+    "bytes": 249793,
+    "icc": "sRGB built-in"
+   }
+  },
+  "eb55c9b5fc0f526b9168b24515eb7d81": {
+   "file": "eb55c9b5fc0f526b9168b24515eb7d81.cd293c90.jpg",
+   "sha256": "cd293c9071fcad0cd050f08ae36e019812c5b83eaf4a7968e50ee1a9ff635f05",
+   "cover_url": "https://raw.githubusercontent.com/YossiMor888/ig-covers/main/covers/eb55c9b5fc0f526b9168b24515eb7d81.cd293c90.jpg",
+   "processing_id": "e56ee3bffd56ba668251233e",
+   "design": "v3",
+   "listing_url": "https://yossimor.com/property/%d7%91%d7%99%d7%aa-%d7%a4%d7%a8%d7%98%d7%99-%d7%a2%d7%9c-600-%d7%9e%d7%92%d7%a8%d7%a9-%d7%a8%d7%97%d7%95%d7%91-%d7%9c%d7%9c%d7%90-%d7%9e%d7%95%d7%a6%d7%90-%d7%a9%d7%a7%d7%98/",
+   "hook": "וילה פרטית ייחודית בגבעת הסלעים",
+   "hook_approved_at": "2026-11-27T11:19:19",
+   "cover_approved_by": "Yossi",
+   "staged_at": "2026-11-27T11:21:04",
+   "jpeg": {
+    "format": "JPEG",
+    "size": [
+     1080,
+     1920
+    ],
+    "mode": "RGB",
+    "bytes": 420588,
+    "icc": "sRGB built-in"
+   }
+  },
+  "4d3a608a129e21261ec700891412e80d": {
+   "file": "4d3a608a129e21261ec700891412e80d.10c65d28.jpg",
+   "sha256": "10c65d286587b47bd2722d043e1f2645a49df62794d8c465f2d7d02191790ba6",
+   "cover_url": "https://raw.githubusercontent.com/YossiMor888/ig-covers/main/covers/4d3a608a129e21261ec700891412e80d.10c65d28.jpg",
+   "processing_id": "4d6371c5cfcbe410d2bb3dd8",
+   "design": "v3",
+   "listing_url": "https://yossimor.com/property/16479/",
+   "hook": "דירת 3 חדרים עם מרפסת ענקית",
+   "hook_approved_at": "2026-11-27T11:19:25",
+   "cover_approved_by": "Yossi",
+   "staged_at": "2026-11-27T11:21:05",
+   "jpeg": {
+    "format": "JPEG",
+    "size": [
+     1080,
+     1920
+    ],
+    "mode": "RGB",
+    "bytes": 282778,
+    "icc": "sRGB built-in"
+   }
   }
  }
 }
