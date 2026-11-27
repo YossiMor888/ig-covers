@@ -153,6 +153,50 @@
     "bytes": 282778,
     "icc": "sRGB built-in"
    }
+  },
+  "7c9cc1c98614cf2f2990005334581d11": {
+   "file": "7c9cc1c98614cf2f2990005334581d11.ac62f7ac.jpg",
+   "sha256": "ac62f7ac662839cde96fd0b35bec390ada7145a9228288210337e1c24a8dd704",
+   "cover_url": "https://raw.githubusercontent.com/YossiMor888/ig-covers/main/covers/7c9cc1c98614cf2f2990005334581d11.ac62f7ac.jpg",
+   "processing_id": "d64d88044d73631f7f6b3e12",
+   "design": "v3",
+   "listing_url": "https://yossimor.com/property/%d7%93%d7%99%d7%a8%d7%aa-5-%d7%91%d7%a0%d7%99%d7%99%d7%9f-%d7%91%d7%95%d7%98%d7%99%d7%a7-%d7%a2%d7%95%d7%a8%d7%a4%d7%99%d7%aa/",
+   "hook": "כ125 מ\"ר בנוי עם מרפסת שמש",
+   "hook_approved_at": "2026-11-27T11:19:08",
+   "cover_approved_by": "Yossi",
+   "staged_at": "2026-11-27T11:25:58",
+   "jpeg": {
+    "format": "JPEG",
+    "size": [
+     1080,
+     1920
+    ],
+    "mode": "RGB",
+    "bytes": 187732,
+    "icc": "sRGB built-in"
+   }
+  },
+  "6c50ae16fc93816a8fd1f452a9c675fc": {
+   "file": "6c50ae16fc93816a8fd1f452a9c675fc.f8d48d86.jpg",
+   "sha256": "f8d48d86e6b2ef92fec73ff0c397d44cc05b8b8c7b4824760074beffa6742457",
+   "cover_url": "https://raw.githubusercontent.com/YossiMor888/ig-covers/main/covers/6c50ae16fc93816a8fd1f452a9c675fc.f8d48d86.jpg",
+   "processing_id": "ce653a14193ea9a860e403ce",
+   "design": "v3",
+   "listing_url": "https://yossimor.com/property/%d7%93%d7%99%d7%a8%d7%aa-%d7%92%d7%9f-5-%d7%97%d7%93%d7%a8%d7%99%d7%9d-%d7%a2%d7%95%d7%a8%d7%a4%d7%99%d7%aa/",
+   "hook": "דירת גן עם גינה גדולה",
+   "hook_approved_at": "2026-11-27T11:19:17",
+   "cover_approved_by": "Yossi",
+   "staged_at": "2026-11-27T11:25:59",
+   "jpeg": {
+    "format": "JPEG",
+    "size": [
+     1080,
+     1920
+    ],
+    "mode": "RGB",
+    "bytes": 227149,
+    "icc": "sRGB built-in"
+   }
   }
  }
 }
